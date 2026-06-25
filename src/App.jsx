@@ -15,7 +15,7 @@ const POPULAR = [
   { name: 'Link', universe: 'Zelda', emoji: '🗡️' },
 ]
 
-function CharacterCard({ label, value, onChange }) {
+function CharacterCard({ label, value, onChange, hasPhoto, onPhotoChange }) {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const filtered = value.length > 0
     ? POPULAR.filter(p => p.name.toLowerCase().includes(value.toLowerCase())).slice(0, 6)
@@ -51,6 +51,15 @@ function CharacterCard({ label, value, onChange }) {
           ))}
         </div>
       )}
+      <label style={styles.photoCheckLabel}>
+        <input
+          type="checkbox"
+          checked={hasPhoto}
+          onChange={e => onPhotoChange(e.target.checked)}
+          style={styles.photoCheckInput}
+        />
+        <span>📷 Tenho foto de referência pra anexar</span>
+      </label>
     </div>
   )
 }
@@ -82,9 +91,9 @@ function ScenarioSelector({ value, onChange }) {
   )
 }
 
-function PromptBlock({ label, content, index }) {
+function PromptBlock({ label, content, type }) {
   const [copied, setCopied] = useState(false)
-  const isImage = label.includes('IMAGE') || label.includes('IMAGEM')
+  const isImage = type === 'image'
 
   const copy = () => {
     navigator.clipboard.writeText(content).then(() => {
@@ -170,6 +179,8 @@ function parseOutput(text) {
 export default function App() {
   const [charA, setCharA] = useState('')
   const [charB, setCharB] = useState('')
+  const [hasPhotoA, setHasPhotoA] = useState(false)
+  const [hasPhotoB, setHasPhotoB] = useState(false)
   const [scenario, setScenario] = useState('universe')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
@@ -191,6 +202,8 @@ export default function App() {
         body: JSON.stringify({
           characterA: charA,
           characterB: charB || null,
+          hasPhotoA,
+          hasPhotoB,
           scenario,
           language: 'Portuguese (Brazilian)'
         })
@@ -256,8 +269,20 @@ export default function App() {
             <span style={{ color: '#c084fc' }}>01</span> PERSONAGENS
           </div>
           <div style={styles.charGrid}>
-            <CharacterCard label="Personagem A (esquerda)" value={charA} onChange={setCharA} />
-            <CharacterCard label="Personagem B (direita) — opcional" value={charB} onChange={setCharB} />
+            <CharacterCard
+              label="Personagem A (esquerda)"
+              value={charA}
+              onChange={setCharA}
+              hasPhoto={hasPhotoA}
+              onPhotoChange={setHasPhotoA}
+            />
+            <CharacterCard
+              label="Personagem B (direita) — opcional"
+              value={charB}
+              onChange={setCharB}
+              hasPhoto={hasPhotoB}
+              onPhotoChange={setHasPhotoB}
+            />
           </div>
         </section>
 
@@ -275,7 +300,7 @@ export default function App() {
           <div>
             <div style={{ fontSize: 12, fontWeight: 600, color: '#c084fc', marginBottom: 3 }}>Como usar imagens de referência</div>
             <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.6 }}>
-              Gere o prompt aqui → cole no <strong style={{ color: '#c084fc' }}>ChatGPT Image</strong> ou <strong style={{ color: '#22d3ee' }}>Nano Banana</strong> → anexe suas imagens de referência junto com o prompt. O prompt já instrui a IA a ignorar fundos e converter estilos de desenho para live-action realista.
+              Marque "tenho foto de referência" pra cada personagem que você for anexar depois no <strong style={{ color: '#c084fc' }}>ChatGPT Image</strong> ou <strong style={{ color: '#22d3ee' }}>Nano Banana</strong>. Se deixar desmarcado, a IA escreve a aparência completa do personagem direto no prompt — sem precisar de nenhuma foto.
             </div>
           </div>
         </div>
@@ -320,7 +345,7 @@ export default function App() {
               {result.map((block, i) => (
                 <PromptBlock
                   key={i}
-                  index={i}
+                  type={block.type}
                   label={block.label}
                   content={block.content.trim()}
                 />
@@ -331,7 +356,7 @@ export default function App() {
               <div style={styles.workflowTitle}>📋 Fluxo de trabalho</div>
               <div style={styles.workflowSteps}>
                 {[
-                  { n: '1', t: 'Copie o prompt de imagem', d: 'Cole no ChatGPT Image ou Nano Banana + anexe suas imagens de referência' },
+                  { n: '1', t: 'Copie o prompt de imagem', d: 'Cole no ChatGPT Image ou Nano Banana + anexe suas imagens de referência (se marcou que tem)' },
                   { n: '2', t: 'Gere a imagem inicial', d: 'A cena de confronto com os dois personagens posicionados' },
                   { n: '3', t: 'Use os prompts de vídeo', d: 'Cole cada prompt no Seedance ou Kling com a imagem gerada como referência' },
                   { n: '4', t: 'Monte a sequência', d: '4 vídeos de 8 segundos = sequência viral completa' },
@@ -482,6 +507,14 @@ const styles = {
     padding: '9px 12px', cursor: 'pointer',
     borderBottom: '1px solid rgba(168,85,247,0.08)',
     transition: 'background 0.1s',
+  },
+  photoCheckLabel: {
+    display: 'flex', alignItems: 'center', gap: 7,
+    marginTop: 8, fontSize: 11, color: '#94a3b8',
+    cursor: 'pointer', userSelect: 'none',
+  },
+  photoCheckInput: {
+    width: 14, height: 14, cursor: 'pointer', accentColor: '#a855f7',
   },
   scenCard: {
     flex: 1, padding: '16px 14px', borderRadius: 10,

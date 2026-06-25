@@ -1,0 +1,26 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #000000;
+  --bg2:       #060914;
+  --bg3:       #0a0d18;
+  --neon:      #a855f7;
+  --neon2:     #7c3aed;
+  --neon-glow: #c084fc;
+  --cyan:      #22d3ee;
+  --text:      #e2e8f0;
+  --muted:     #64748b;
+  --border:    rgba(168,85,247,0.18);
+  --border-hi: rgba(168,85,247,0.45);
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--neon2); border-radius: 2px; }

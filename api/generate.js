@@ -40,7 +40,13 @@ ${isNinja
 ${characterB && characterB.trim() ? `- Character B: ${characterB}` : '- Only one character in this sequence (solo performance).'}
 - Maximum 2 characters per scene.
 - Performers are in realistic cosplay/costume — no real weapons, all moves are stage choreography/martial arts/acrobatics with practical effects.
-- The image prompt must explicitly instruct: if the user's reference photo has its own background, ignore/discard that background entirely and isolate only the person/character; if the reference looks like a drawing/cartoon, convert it to photorealistic live-action while preserving the same face, hairstyle and outfit.
+- The IMAGE prompt must explicitly include instructions along these lines (adapt naturally, don't just copy verbatim):
+  - "Use the uploaded reference image(s) strictly as a character identity reference: face, hairstyle and outfit only."
+  - "Ignore the original photo's background, lighting, composition and photographic style entirely — none of that should carry over."
+  - "Preserve the original outfit/costume design exactly: colors, logos, patterns and accessories, with only minor realistic fabric/texture adaptation allowed."
+  - "If the reference is a drawing/cartoon, fully convert it to photorealistic live-action while keeping the same face, hair and costume recognizable."
+  - "The character must inherit the lighting, shadows and color grading of the stage environment described above — not the lighting from the reference photo."
+  - "Photorealistic live-action adaptation: the performer must look like a real professional actor/stunt performer in a high-quality costume on a real stage — not CGI, not a 3D render, not a video-game character, not a generic cosplay-convention snapshot."
 
 4. POWERS / ACTIONS:
 ${isNinja

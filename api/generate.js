@@ -10,7 +10,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada no servidor' });
     }
 
-    const { characterA, characterB, scenario, language } = req.body || {};
+    const { characterA, characterB, scenario, language, hasPhotoA, hasPhotoB } = req.body || {};
 
     if (!characterA || !characterA.trim()) {
       return res.status(400).json({ error: 'Personagem A é obrigatório' });
@@ -18,6 +18,13 @@ export default async function handler(req, res) {
 
     const isNinja = scenario === 'ninja';
     const lang = language || 'Portuguese (Brazilian)';
+
+    function characterIdentityRule(label, name, hasPhoto) {
+      if (hasPhoto) {
+        return `- ${label} (${name}): the user WILL attach a reference photo when using this prompt in the image generator. Use that uploaded photo strictly as an identity reference (face, hairstyle) only — ignore its background, lighting, composition and photographic style entirely. Preserve the original outfit/costume design exactly (colors, logos, patterns, accessories); only minor realistic fabric/texture adaptation is allowed. If the reference looks like a drawing/cartoon, fully convert it to photorealistic live-action while keeping the same face, hair and costume recognizable.`;
+      }
+      return `- ${label} (${name}): No reference photo will be attached for this character. Write out this character's full canonical appearance directly in the prompt from your own knowledge — facial features, hairstyle and color, and the exact costume/outfit with colors and signature details — so the image generator can recreate them accurately with no uploaded image needed.`;
+    }
 
     const systemPrompt = `You are a prompt engineer specialized in generating viral "stage show" image-to-video sequences for AI image and video generators (ChatGPT Image, Nano Banana, Seedance, Kling).
 
@@ -36,17 +43,11 @@ ${isNinja
   : `- Adapt the stage environment to fit the visual universe/world of the character(s) provided. Build a coherent live-stage-show set design themed around that universe (architecture, colors, props, banners) while keeping the audience-POV format above.`}
 
 3. CHARACTERS:
-- Character A: ${characterA}
-${characterB && characterB.trim() ? `- Character B: ${characterB}` : '- Only one character in this sequence (solo performance).'}
+${characterIdentityRule('Character A', characterA, !!hasPhotoA)}
+${characterB && characterB.trim() ? characterIdentityRule('Character B', characterB, !!hasPhotoB) : '- Only one character in this sequence (solo performance).'}
 - Maximum 2 characters per scene.
 - Performers are in realistic cosplay/costume — no real weapons, all moves are stage choreography/martial arts/acrobatics with practical effects.
-- The IMAGE prompt must explicitly include instructions along these lines (adapt naturally, don't just copy verbatim):
-  - "Use the uploaded reference image(s) strictly as a character identity reference: face, hairstyle and outfit only."
-  - "Ignore the original photo's background, lighting, composition and photographic style entirely — none of that should carry over."
-  - "Preserve the original outfit/costume design exactly: colors, logos, patterns and accessories, with only minor realistic fabric/texture adaptation allowed."
-  - "If the reference is a drawing/cartoon, fully convert it to photorealistic live-action while keeping the same face, hair and costume recognizable."
-  - "The character must inherit the lighting, shadows and color grading of the stage environment described above — not the lighting from the reference photo."
-  - "Photorealistic live-action adaptation: the performer must look like a real professional actor/stunt performer in a high-quality costume on a real stage — not CGI, not a 3D render, not a video-game character, not a generic cosplay-convention snapshot."
+- Regardless of whether a photo is attached or not: the character must inherit the lighting, shadows and color grading of the stage environment described above. Photorealistic live-action adaptation: the performer must look like a real professional actor/stunt performer in a high-quality costume on a real stage — not CGI, not a 3D render, not a video-game character, not a generic cosplay-convention snapshot.
 
 4. POWERS / ACTIONS:
 ${isNinja

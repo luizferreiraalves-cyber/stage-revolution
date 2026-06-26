@@ -64,7 +64,7 @@ ${isNinja
 - VIDEO 2 (5-8s): first character's signature power/move triggers
 - VIDEO 3: second character's signature power/move or counter-move
 - VIDEO 4: closing beat — big finishing visual (explosion of effects/smoke/light)
-- VIDEO PROMPTS ARE IMAGE-TO-VIDEO, NOT TEXT-TO-VIDEO: the starting frame image already locks in the camera, lighting, stage and outfits — do NOT redescribe any of that. Each video prompt must open with a single short continuity line (e.g. "Continuing from the previous frame, no camera cut:") and then go straight into motion-only instructions: what moves, how, and the end state. Keep each video prompt to roughly 40-70 words total — concise and action-focused, not a scene description.
+- VIDEO PROMPTS ARE IMAGE-TO-VIDEO, NOT TEXT-TO-VIDEO: the starting frame image already locks in the camera, lighting, stage and outfits — do NOT redescribe any of that. Go straight into motion-only instructions: what moves, how fast, and the end state. Keep each video prompt to 20-40 words — concise and action-focused only.
 
 OUTPUT FORMAT — follow this EXACTLY, written in ${lang}, no extra commentary outside it:
 

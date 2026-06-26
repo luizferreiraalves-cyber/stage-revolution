@@ -19,9 +19,9 @@ export default async function handler(req, res) {
     const isNinja = scenario === 'ninja';
     const lang = language || 'Portuguese (Brazilian)';
 
-    function characterIdentityRule(label, name, hasPhoto) {
+    function characterIdentityRule(label, name, hasPhoto, uploadOrder) {
       if (hasPhoto) {
-        return `- ${label} (${name}): the user WILL attach a reference photo when using this prompt in the image generator. Use that uploaded photo strictly as an identity reference (face, hairstyle) only — ignore its background, lighting, composition and photographic style entirely. Preserve the original outfit/costume design exactly (colors, logos, patterns, accessories); only minor realistic fabric/texture adaptation is allowed. If the reference looks like a drawing/cartoon, fully convert it to photorealistic live-action while keeping the same face, hair and costume recognizable.`;
+        return `- ${label} (${name}): the user WILL attach a reference photo when using this prompt. Reference the ${uploadOrder} uploaded image for this character's appearance. Do NOT write any visual description of this character's face, hair, costume or colors — the uploaded photo is the sole identity source. Simply instruct the generator: "Character ${label.slice(-1)}: take face, hairstyle and full costume exactly from the ${uploadOrder} uploaded reference photo — reproduce it precisely with no modifications or additions."`;
       }
       return `- ${label} (${name}): No reference photo will be attached for this character. Write out this character's full canonical appearance directly in the prompt from your own knowledge — facial features, hairstyle and color, and the exact costume/outfit with colors and signature details — so the image generator can recreate them accurately with no uploaded image needed.`;
     }
@@ -43,11 +43,11 @@ ${isNinja
   : `- Adapt the stage environment to fit the visual universe/world of the character(s) provided. Build a coherent live-stage-show set design themed around that universe (architecture, colors, props, banners) while keeping the audience-POV format above.`}
 
 3. CHARACTERS:
-${characterIdentityRule('Character A', characterA, !!hasPhotoA)}
-${characterB && characterB.trim() ? characterIdentityRule('Character B', characterB, !!hasPhotoB) : '- Only one character in this sequence (solo performance).'}
+${characterIdentityRule('Character A', characterA, !!hasPhotoA, 'first')}
+${characterB && characterB.trim() ? characterIdentityRule('Character B', characterB, !!hasPhotoB, 'second') : '- Only one character in this sequence (solo performance).'}
 - Maximum 2 characters per scene.
 - Performers are in realistic cosplay/costume — no real weapons, all moves are stage choreography/martial arts/acrobatics with practical effects.
-- Regardless of whether a photo is attached or not: the character must inherit the lighting, shadows and color grading of the stage environment described above. Photorealistic live-action adaptation: the performer must look like a real professional actor/stunt performer in a high-quality costume on a real stage — not CGI, not a 3D render, not a video-game character, not a generic cosplay-convention snapshot.
+- Regardless of whether a photo is attached or not: the character must inherit the lighting, shadows and color grading of the stage environment. Photorealistic live-action adaptation: the performer must look like a real professional actor/stunt performer in a high-quality costume on a real stage — not CGI, not a 3D render, not a video-game character, not a generic cosplay-convention snapshot.
 
 4. POWERS / ACTIONS:
 ${isNinja
@@ -56,7 +56,7 @@ ${isNinja
 
 5. VIDEO PROMPT NAMING RULE (critical):
 - The IMAGE prompt MAY reference the character names normally.
-- The 4 VIDEO prompts must NEVER mention character names or franchise names. Refer to characters only by visual description and stage position ("the performer on the left in red and blue", "the performer on the right with green skin").
+- The 4 VIDEO prompts must NEVER mention character names or franchise names. Refer to characters only by visual description and stage position ("the performer on the left in red and blue", "the performer on the right with spiky yellow hair").
 
 6. SEQUENCE STRUCTURE — exactly 1 image + 4 videos:
 - IMAGE: a freeze-frame moment right before the confrontation begins, both performers facing off, stage fully visible. Must start with the word "Photorealistic."
@@ -64,7 +64,7 @@ ${isNinja
 - VIDEO 2 (5-8s): first character's signature power/move triggers
 - VIDEO 3: second character's signature power/move or counter-move
 - VIDEO 4: closing beat — big finishing visual (explosion of effects/smoke/light)
-- VIDEO PROMPTS ARE IMAGE-TO-VIDEO, NOT TEXT-TO-VIDEO: the starting frame image already locks in the camera, lighting, stage and outfits — do NOT redescribe any of that. Go straight into motion-only instructions: what moves, how fast, and the end state. Keep each video prompt to 20-40 words — concise and action-focused only.
+- VIDEO PROMPTS ARE IMAGE-TO-VIDEO: the starting frame image already locks in camera, lighting, stage and outfits. Go straight into motion-only instructions — what moves, how fast, and the end state. Do NOT redescribe the stage, camera, lighting or outfits. Keep each video prompt to 20-40 words — concise and action-focused only.
 
 OUTPUT FORMAT — follow this EXACTLY, written in ${lang}, no extra commentary outside it:
 

@@ -136,7 +136,7 @@ function PromptBlock({ label, content, type }) {
       {!isImage && (
         <div style={{ ...styles.imageTip, borderColor: 'rgba(34,211,238,0.15)', background: 'rgba(34,211,238,0.04)' }}>
           <span style={{ fontSize: 16 }}>🎬</span>
-          <span>Use in <strong style={{ color: '#22d3ee' }}>Seedance</strong> or <strong style={{ color: '#22d3ee' }}>Kling</strong> with the generated image as reference.</span>
+          <span>Use in <strong style={{ color: '#22d3ee' }}>Seedance</strong> or <strong style={{ color: '#22d3ee' }}>Kling</strong> with the generated image as the starting frame.</span>
         </div>
       )}
     </div>
@@ -239,10 +239,10 @@ export default function App() {
           <div style={styles.heroTag}>PROMPT GENERATOR</div>
           <h1 style={styles.heroTitle}>
             Any character.<br />
-            <span style={styles.heroAccent}>One viral show.</span>
+            <span style={styles.heroAccent}>A viral show.</span>
           </h1>
           <p style={styles.heroDesc}>
-            Pick your characters, choose a scenario and generate optimized prompts for image and video — ready for ChatGPT Image, Nano Banana and Seedance.
+            Pick your characters, choose a scenario, and generate optimized prompts for image and video — ready for ChatGPT Image, Nano Banana and Seedance.
           </p>
         </div>
       </div>
@@ -321,7 +321,7 @@ export default function App() {
           <div ref={resultRef} style={styles.resultSection}>
             <div style={styles.resultHeader}>
               <div style={styles.sectionLabel}>
-                <span style={{ color: '#c084fc' }}>✓</span> GENERATED PROMPTS
+                <span style={{ color: '#c084fc' }}>✓</span> PROMPTS GENERATED
               </div>
               <button onClick={copyAll} style={styles.copyAllBtn}>
                 📋 Copy all
@@ -340,13 +340,13 @@ export default function App() {
             </div>
 
             <div style={styles.workflowBox}>
-              <div style={styles.workflowTitle}>📋 Workflow</div>
+              <div style={styles.workflowTitle}>📋 WORKFLOW</div>
               <div style={styles.workflowSteps}>
                 {[
-                  { n: '1', t: 'Copy the image prompt', d: 'Paste into ChatGPT Image or Nano Banana + attach your reference images (if you checked that you have them)' },
-                  { n: '2', t: 'Generate the starting image', d: 'The confrontation scene with both characters positioned on stage' },
-                  { n: '3', t: 'Use the video prompts', d: 'Paste each prompt into Seedance or Kling with the generated image as reference' },
-                  { n: '4', t: 'Assemble the sequence', d: '4 video clips = complete viral sequence' },
+                  { n: '1', t: 'Copy the image prompt', d: 'Paste into ChatGPT Image or Nano Banana + attach your reference images (if you checked having them)' },
+                  { n: '2', t: 'Generate the initial image', d: 'The confrontation scene with both characters positioned on stage' },
+                  { n: '3', t: 'Use the video prompts', d: 'Paste each prompt into Seedance or Kling with the generated image as the starting frame' },
+                  { n: '4', t: 'Assemble the sequence', d: '4 videos × 8 seconds = complete viral sequence' },
                 ].map(s => (
                   <div key={s.n} style={styles.workflowStep}>
                     <div style={styles.workflowNum}>{s.n}</div>

@@ -27,7 +27,7 @@ function CharacterCard({ label, value, onChange, hasPhoto, onPhotoChange }) {
       <div style={styles.inputWrap}>
         <input
           style={styles.input}
-          placeholder="Nome do personagem..."
+          placeholder="Character name..."
           value={value}
           onChange={e => { onChange(e.target.value); setShowSuggestions(true) }}
           onFocus={() => setShowSuggestions(true)}
@@ -58,7 +58,7 @@ function CharacterCard({ label, value, onChange, hasPhoto, onPhotoChange }) {
           onChange={e => onPhotoChange(e.target.checked)}
           style={styles.photoCheckInput}
         />
-        <span>📷 Tenho foto de referência pra anexar</span>
+        <span>📷 I have a reference photo to attach</span>
       </label>
     </div>
   )
@@ -66,8 +66,8 @@ function CharacterCard({ label, value, onChange, hasPhoto, onPhotoChange }) {
 
 function ScenarioSelector({ value, onChange }) {
   const opts = [
-    { id: 'universe', emoji: '🎭', title: 'Universo do Personagem', desc: 'Cenário adaptado ao mundo do personagem' },
-    { id: 'ninja', emoji: '🥷', title: 'Ninja Clássico', desc: 'Palco ninja japonês tradicional' },
+    { id: 'universe', emoji: '🎭', title: "Character's Universe", desc: "Stage adapted to the character's world" },
+    { id: 'ninja', emoji: '🥷', title: 'Classic Ninja', desc: 'Traditional Japanese ninja stage' },
   ]
   return (
     <div style={{ display: 'flex', gap: 10 }}>
@@ -123,20 +123,20 @@ function PromptBlock({ label, content, type }) {
           color: copied ? '#4ade80' : '#c084fc',
           borderColor: copied ? 'rgba(34,197,94,0.4)' : 'rgba(168,85,247,0.3)',
         }}>
-          {copied ? '✓ Copiado' : '📋 Copiar'}
+          {copied ? '✓ Copied' : '📋 Copy'}
         </button>
       </div>
       <div style={styles.promptText}>{content}</div>
       {isImage && (
         <div style={styles.imageTip}>
           <span style={{ fontSize: 16 }}>💡</span>
-          <span>Cole este prompt no <strong style={{ color: '#c084fc' }}>ChatGPT Image</strong> ou <strong style={{ color: '#22d3ee' }}>Nano Banana</strong> e anexe suas imagens de referência junto.</span>
+          <span>Paste this prompt into <strong style={{ color: '#c084fc' }}>ChatGPT Image</strong> or <strong style={{ color: '#22d3ee' }}>Nano Banana</strong> and attach your reference images.</span>
         </div>
       )}
       {!isImage && (
         <div style={{ ...styles.imageTip, borderColor: 'rgba(34,211,238,0.15)', background: 'rgba(34,211,238,0.04)' }}>
           <span style={{ fontSize: 16 }}>🎬</span>
-          <span>Use no <strong style={{ color: '#22d3ee' }}>Seedance</strong> ou <strong style={{ color: '#22d3ee' }}>Kling</strong> com a imagem gerada como referência.</span>
+          <span>Use in <strong style={{ color: '#22d3ee' }}>Seedance</strong> or <strong style={{ color: '#22d3ee' }}>Kling</strong> with the generated image as reference.</span>
         </div>
       )}
     </div>
@@ -205,7 +205,7 @@ export default function App() {
           hasPhotoA,
           hasPhotoB,
           scenario,
-          language: 'Portuguese (Brazilian)'
+          language: 'English'
         })
       })
       const data = await res.json()
@@ -232,30 +232,17 @@ export default function App() {
 
   return (
     <div style={styles.app}>
-      {/* HEADER */}
-      <header style={styles.header}>
-        <div style={styles.headerLeft}>
-          <div style={styles.logoGlow}>
-            <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 20, fontWeight: 900 }}>SR</span>
-          </div>
-          <div>
-            <div style={styles.logoTitle}>STAGE REVOLUTION</div>
-            <div style={styles.logoSub}>Gerador de prompts virais · Image + Video</div>
-          </div>
-        </div>
-        <div style={styles.badge}>⚡ Claude AI</div>
-      </header>
 
       {/* HERO */}
       <div style={styles.hero}>
         <div style={styles.heroInner}>
           <div style={styles.heroTag}>PROMPT GENERATOR</div>
           <h1 style={styles.heroTitle}>
-            Qualquer personagem.<br />
-            <span style={styles.heroAccent}>Um show viral.</span>
+            Any character.<br />
+            <span style={styles.heroAccent}>One viral show.</span>
           </h1>
           <p style={styles.heroDesc}>
-            Escolha os personagens, o cenário e gere prompts otimizados para imagem e vídeo — prontos para ChatGPT Image, Nano Banana e Seedance.
+            Pick your characters, choose a scenario and generate optimized prompts for image and video — ready for ChatGPT Image, Nano Banana and Seedance.
           </p>
         </div>
       </div>
@@ -263,21 +250,21 @@ export default function App() {
       {/* BUILDER */}
       <div style={styles.builder}>
 
-        {/* PERSONAGENS */}
+        {/* CHARACTERS */}
         <section style={styles.section}>
           <div style={styles.sectionLabel}>
-            <span style={{ color: '#c084fc' }}>01</span> PERSONAGENS
+            <span style={{ color: '#c084fc' }}>01</span> CHARACTERS
           </div>
           <div style={styles.charGrid}>
             <CharacterCard
-              label="Personagem A (esquerda)"
+              label="Character A (left)"
               value={charA}
               onChange={setCharA}
               hasPhoto={hasPhotoA}
               onPhotoChange={setHasPhotoA}
             />
             <CharacterCard
-              label="Personagem B (direita) — opcional"
+              label="Character B (right) — optional"
               value={charB}
               onChange={setCharB}
               hasPhoto={hasPhotoB}
@@ -286,26 +273,26 @@ export default function App() {
           </div>
         </section>
 
-        {/* CENÁRIO */}
+        {/* SCENARIO */}
         <section style={styles.section}>
           <div style={styles.sectionLabel}>
-            <span style={{ color: '#c084fc' }}>02</span> CENÁRIO
+            <span style={{ color: '#c084fc' }}>02</span> SCENARIO
           </div>
           <ScenarioSelector value={scenario} onChange={setScenario} />
         </section>
 
-        {/* DICA REFERÊNCIA */}
+        {/* REFERENCE TIP */}
         <div style={styles.refTip}>
           <div style={{ fontSize: 22 }}>📎</div>
           <div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: '#c084fc', marginBottom: 3 }}>Como usar imagens de referência</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#c084fc', marginBottom: 3 }}>How to use reference images</div>
             <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.6 }}>
-              Marque "tenho foto de referência" pra cada personagem que você for anexar depois no <strong style={{ color: '#c084fc' }}>ChatGPT Image</strong> ou <strong style={{ color: '#22d3ee' }}>Nano Banana</strong>. Se deixar desmarcado, a IA escreve a aparência completa do personagem direto no prompt — sem precisar de nenhuma foto.
+              Check "I have a reference photo" for each character you plan to attach later in <strong style={{ color: '#c084fc' }}>ChatGPT Image</strong> or <strong style={{ color: '#22d3ee' }}>Nano Banana</strong>. If left unchecked, the AI will write the character's full appearance directly in the prompt — no photo needed.
             </div>
           </div>
         </div>
 
-        {/* GERAR */}
+        {/* GENERATE */}
         <button
           onClick={generate}
           disabled={loading || !charA.trim()}
@@ -318,9 +305,9 @@ export default function App() {
           {loading ? (
             <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={styles.spinner} />
-              Gerando prompts...
+              Generating prompts...
             </span>
-          ) : '🎬 Gerar Prompts'}
+          ) : '🎬 Generate Prompts'}
         </button>
 
         {error && (
@@ -329,15 +316,15 @@ export default function App() {
           </div>
         )}
 
-        {/* RESULTADO */}
+        {/* RESULTS */}
         {result && result.length > 0 && (
           <div ref={resultRef} style={styles.resultSection}>
             <div style={styles.resultHeader}>
-              <div style={styles.sectionLabel} >
-                <span style={{ color: '#c084fc' }}>✓</span> PROMPTS GERADOS
+              <div style={styles.sectionLabel}>
+                <span style={{ color: '#c084fc' }}>✓</span> GENERATED PROMPTS
               </div>
               <button onClick={copyAll} style={styles.copyAllBtn}>
-                📋 Copiar tudo
+                📋 Copy all
               </button>
             </div>
 
@@ -353,13 +340,13 @@ export default function App() {
             </div>
 
             <div style={styles.workflowBox}>
-              <div style={styles.workflowTitle}>📋 Fluxo de trabalho</div>
+              <div style={styles.workflowTitle}>📋 Workflow</div>
               <div style={styles.workflowSteps}>
                 {[
-                  { n: '1', t: 'Copie o prompt de imagem', d: 'Cole no ChatGPT Image ou Nano Banana + anexe suas imagens de referência (se marcou que tem)' },
-                  { n: '2', t: 'Gere a imagem inicial', d: 'A cena de confronto com os dois personagens posicionados' },
-                  { n: '3', t: 'Use os prompts de vídeo', d: 'Cole cada prompt no Seedance ou Kling com a imagem gerada como referência' },
-                  { n: '4', t: 'Monte a sequência', d: '4 vídeos de 8 segundos = sequência viral completa' },
+                  { n: '1', t: 'Copy the image prompt', d: 'Paste into ChatGPT Image or Nano Banana + attach your reference images (if you checked that you have them)' },
+                  { n: '2', t: 'Generate the starting image', d: 'The confrontation scene with both characters positioned on stage' },
+                  { n: '3', t: 'Use the video prompts', d: 'Paste each prompt into Seedance or Kling with the generated image as reference' },
+                  { n: '4', t: 'Assemble the sequence', d: '4 video clips = complete viral sequence' },
                 ].map(s => (
                   <div key={s.n} style={styles.workflowStep}>
                     <div style={styles.workflowNum}>{s.n}</div>
@@ -400,42 +387,6 @@ const styles = {
     background: '#000',
     color: '#e2e8f0',
     fontFamily: 'Inter, sans-serif',
-  },
-  header: {
-    padding: '14px 24px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottom: '1px solid rgba(168,85,247,0.18)',
-    background: '#0a0d18',
-  },
-  headerLeft: { display: 'flex', alignItems: 'center', gap: 14 },
-  logoGlow: {
-    width: 44, height: 44, borderRadius: '50%',
-    background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    boxShadow: '0 0 20px rgba(168,85,247,0.5)',
-    color: '#fff',
-    flexShrink: 0,
-  },
-  logoTitle: {
-    fontFamily: 'Orbitron, monospace',
-    fontSize: 16, fontWeight: 900,
-    background: 'linear-gradient(135deg, #c084fc, #22d3ee)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text',
-  },
-  logoSub: { fontSize: 10, color: '#64748b', marginTop: 2 },
-  badge: {
-    fontFamily: 'Orbitron, monospace',
-    fontSize: '0.58rem',
-    letterSpacing: '0.2em',
-    color: '#c084fc',
-    border: '1px solid rgba(168,85,247,0.45)',
-    padding: '6px 14px',
-    borderRadius: 6,
-    background: 'rgba(168,85,247,0.07)',
   },
   hero: {
     padding: '40px 24px 32px',
@@ -630,7 +581,6 @@ const styles = {
   },
 }
 
-// inject spinner keyframe
 const styleEl = document.createElement('style')
 styleEl.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`
 document.head.appendChild(styleEl)

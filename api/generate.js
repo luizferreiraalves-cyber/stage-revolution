@@ -67,15 +67,7 @@ ${isNinja
 - VIDEO 2 (5-8s): first character's signature power/move triggers
 - VIDEO 3: second character's signature power/move or counter-move
 - VIDEO 4: closing beat — big finishing visual (explosion of effects/smoke/light)
-
-VIDEO PROMPT RULES — CRITICAL, NO EXCEPTIONS, APPLY TO ALL 4 VIDEO PROMPTS:
-- These are IMAGE-TO-VIDEO prompts. The starting frame already locks stage, lighting and costumes.
-- YOU MUST OPEN EVERY SINGLE VIDEO PROMPT WITH THIS EXACT PHRASE (copy it verbatim, do not paraphrase, do not skip):
-  "POV shaky handheld phone from the audience, camera nervously tracking the movement —"
-- This opening line is MANDATORY in VIDEO 1, VIDEO 2, VIDEO 3, and VIDEO 4. All four. No exceptions.
-- After that opening phrase, describe only the motion: what moves, how fast, end state.
-- Keep each video prompt between 30-50 words total including the opening phrase.
-- A video prompt that does NOT start with that exact phrase is invalid and must be rewritten.
+- VIDEO PROMPTS ARE IMAGE-TO-VIDEO, NOT TEXT-TO-VIDEO: the starting frame already locks stage, lighting and costumes. Describe only the motion: what moves, how fast, end state. Keep each video prompt to 30-50 words.
 
 OUTPUT FORMAT — follow this EXACTLY, written in ${lang}, no extra commentary outside it:
 
@@ -130,11 +122,24 @@ OUTPUT FORMAT — follow this EXACTLY, written in ${lang}, no extra commentary o
     }
 
     const textBlock = (data.content || []).find((b) => b.type === 'text');
-    const result = textBlock ? textBlock.text : '';
+    let result = textBlock ? textBlock.text : '';
 
     if (!result) {
       return res.status(500).json({ error: 'A API não retornou texto' });
     }
+
+    // Injeta prefixo de câmera garantido em todos os prompts de vídeo
+    const cameraPrefix = 'POV shaky handheld phone from the audience, camera nervously tracking the movement — ';
+    result = result.replace(
+      /(## 🎬 VIDEO PROMPT \d+:[^\n]*\n)([\s\S]*?)(?=\n## |\n*$)/g,
+      (match, header, body) => {
+        const trimmed = body.trim();
+        if (!trimmed.startsWith('POV')) {
+          return `${header}${cameraPrefix}${trimmed}\n`;
+        }
+        return match;
+      }
+    );
 
     return res.status(200).json({ result });
   } catch (err) {

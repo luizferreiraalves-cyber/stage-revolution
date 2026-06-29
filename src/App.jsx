@@ -472,3 +472,14 @@ if (root) {
   root.style.background = '#000'
   root.style.minHeight = '100vh'
 }
+document.body.style.background = '#000'
+document.documentElement.style.background = '#000'
+document.body.style.margin = '0'
+document.body.style.padding = '0'
+document.body.style.overflowX = 'hidden'
+
+const root = document.getElementById('root')
+if (root) {
+  root.style.background = '#000'
+  root.style.minHeight = '100vh'
+}

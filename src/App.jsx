@@ -387,6 +387,8 @@ const styles = {
     background: '#000',
     color: '#e2e8f0',
     fontFamily: 'Inter, sans-serif',
+    display: 'flex',
+    flexDirection: 'column',
   },
   hero: {
     padding: '40px 24px 32px',
@@ -418,6 +420,8 @@ const styles = {
     maxWidth: 780, margin: '0 auto',
     padding: '32px 24px 60px',
     display: 'flex', flexDirection: 'column', gap: 28,
+    flex: 1,
+    width: '100%',
   },
   section: { display: 'flex', flexDirection: 'column', gap: 12 },
   sectionLabel: {

@@ -10,24 +10,23 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada no servidor' });
     }
 
-    const { characterA, characterB, scenario, language, hasPhotoA, hasPhotoB } = req.body || {};
+    const { characterA, characterB, scenario, language } = req.body || {};
 
     if (!characterA || !characterA.trim()) {
       return res.status(400).json({ error: 'Personagem A é obrigatório' });
     }
+    if (!characterB || !characterB.trim()) {
+      return res.status(400).json({ error: 'Personagem B é obrigatório' });
+    }
 
     const isNinja = scenario === 'ninja';
     const lang = language || 'English';
-    const hasBoth = !!hasPhotoA && !!(characterB && characterB.trim() && hasPhotoB);
 
-    function characterIdentityRule(label, name, hasPhoto, uploadOrder) {
-      if (hasPhoto) {
-        const refText = hasBoth
-          ? (uploadOrder === 1 ? 'the first uploaded reference image' : 'the second uploaded reference image')
-          : 'the uploaded reference image';
-        return `- ${label} (${name}): appearance defined entirely by ${refText}. Do NOT write any visual description of this character — no face description, no hair description, no outfit description, no colors. Only instruct the image generator to use ${refText} as the complete identity reference for this character. The image generator will read the photo directly.`;
-      }
-      return `- ${label} (${name}): No reference photo will be attached. Write this character's full canonical appearance directly in the prompt from your own knowledge — facial features, hairstyle and color, and the exact costume/outfit with all colors and signature details — so the image generator can recreate them accurately without any uploaded image.`;
+    function characterIdentityRule(label, name, uploadOrder) {
+      const refText = uploadOrder === 1
+        ? 'the first uploaded reference image'
+        : 'the second uploaded reference image';
+      return `- ${label} (${name}): appearance defined entirely by ${refText}. Do NOT write any visual description of this character — no face description, no hair description, no outfit description, no colors. Only instruct the image generator to use ${refText} as the complete identity reference for this character. The image generator will read the photo directly.`;
     }
 
     const systemPrompt = `You are a prompt engineer specialized in generating viral "stage show" image-to-video sequences for AI image and video generators (ChatGPT Image, Nano Banana, Seedance, Kling).
@@ -44,22 +43,22 @@ RULES YOU MUST FOLLOW EXACTLY:
 2. SCENARIO:
 ${isNinja
   ? `- Classic ninja village stage: tiled Japanese roof, grey stone wall, clan banners, large white cloth with black kanji, wooden pole, forested green mountains in the background`
-  : `- Adapt the stage environment to fit the visual universe/world of the character(s) provided. Build a coherent live-stage-show set design themed around that universe (architecture, colors, props, banners) while keeping the audience-POV format above.`}
+  : `- Use the names "${characterA}" and "${characterB}" as context clues. Infer each character's visual universe and iconic aesthetic elements from your knowledge. Then build a cohesive live-stage-show set design that fuses or blends both universes — architecture style, dominant colors, props, banners, atmospheric lighting — into a single stage environment that feels native to both. Keep the audience-POV outdoor format.`}
 
 3. CHARACTERS:
-${characterIdentityRule('Character A', characterA, !!hasPhotoA, 1)}
-${characterB && characterB.trim() ? characterIdentityRule('Character B', characterB, !!hasPhotoB, 2) : '- Only one character in this sequence (solo performance).'}
+${characterIdentityRule('Character A', characterA, 1)}
+${characterIdentityRule('Character B', characterB, 2)}
 - Maximum 2 characters per scene.
 - Performers are in realistic cosplay/costume — no real weapons, all moves are stage choreography/martial arts/acrobatics with practical effects.
-- The character must inherit the lighting, shadows and color grading of the stage environment. Photorealistic live-action adaptation: the performer must look like a real professional actor/stunt performer in a high-quality costume on a real stage — not CGI, not a 3D render, not a video-game character.
+- Each character must inherit the lighting, shadows and color grading of the stage environment. Photorealistic live-action adaptation: performers must look like real professional actors/stunt performers in high-quality costumes on a real stage — not CGI, not 3D renders, not video-game characters.
 
 4. POWERS / ACTIONS:
 ${isNinja
-  ? `- Use classic ninja jutsu-style effects: clone jutsu, fire breath, water shield, dust burst, smoke summoning. Pick ones that fit the characters.`
-  : `- Powers and special moves must come from the character's OWN canon abilities (energy blasts, elemental powers, signature techniques, etc.) — never generic ninja jutsu unless the character is canonically a ninja.`}
+  ? `- Use classic ninja jutsu-style effects: clone jutsu, fire breath, water shield, dust burst, smoke summoning. Pick the ones that best fit the characters.`
+  : `- Infer each character's powers and signature moves from their name and known universe. Use canonical abilities (energy blasts, elemental powers, signature techniques, etc.). If a character is obscure or fictional, create thematically fitting powers based on their name and implied world.`}
 
 5. VIDEO PROMPT NAMING RULE (critical):
-- The IMAGE prompt MAY reference the character names normally.
+- The IMAGE prompt MAY reference character names normally.
 - The 4 VIDEO prompts must NEVER mention character names or franchise names. Refer to characters only by visual description and stage position ("the performer on the left", "the performer on the right").
 
 6. SEQUENCE STRUCTURE — exactly 1 image + 4 videos:
@@ -107,7 +106,7 @@ OUTPUT FORMAT — follow this EXACTLY, written in ${lang}, no extra commentary o
         messages: [
           {
             role: 'user',
-            content: `Generate the sequence now for Character A: ${characterA}${characterB && characterB.trim() ? ` and Character B: ${characterB}` : ''}.`,
+            content: `Generate the sequence now for Character A: ${characterA} and Character B: ${characterB}.`,
           },
         ],
       }),

@@ -420,7 +420,6 @@ const styles = {
     maxWidth: 780, margin: '0 auto',
     padding: '32px 24px 60px',
     display: 'flex', flexDirection: 'column', gap: 28,
-    flex: 1,
     width: '100%',
   },
   section: { display: 'flex', flexDirection: 'column', gap: 12 },
@@ -582,6 +581,7 @@ const styles = {
     textAlign: 'center', fontSize: 10, color: '#374151',
     background: '#0a0d18',
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+    marginTop: 'auto',
   },
 }
 

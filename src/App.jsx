@@ -464,3 +464,11 @@ styleEl.textContent = `
   html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 `
 document.head.appendChild(styleEl)
+document.documentElement.style.background = '#000'
+document.body.style.background = '#000'
+
+const root = document.getElementById('root')
+if (root) {
+  root.style.background = '#000'
+  root.style.minHeight = '100vh'
+}

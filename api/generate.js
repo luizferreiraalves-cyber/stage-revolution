@@ -27,7 +27,6 @@ export default async function handler(req, res) {
     function characterIdentityRule(label, name, position) {
       if (isSafeMode) {
         // SAFE MODE: NO name cited — describe only iconic visual elements
-        // Claude must infer appearance from the name but never write the name in the prompt
         return `- ${label}: a professional stunt performer whose costume is inspired by the character known as "${name}". DO NOT write the character's name anywhere in the image prompt. Instead, describe only the iconic visual elements of their costume: silhouette, dominant colors, key accessories, hair style, and any recognizable symbols or patterns — enough to make the character identifiable without naming them. No reference photo needed. Photorealistic human performer, not CGI.`;
       } else {
         // STANDARD MODE: cite name + reference photo as identity
@@ -39,6 +38,20 @@ export default async function handler(req, res) {
     const imageCameraRule = isSafeMode
       ? `- CAMERA FOR IMAGE: ultra wide-angle shot from deep in the audience, phone held high above heads — performers appear small on a large stage, full stage environment dominates the frame, no facial details visible, audience silhouettes and raised phones fill the lower third of the frame. The distance makes individual costume details subtle.`
       : `- CAMERA FOR IMAGE: wide-angle shot from the audience, phone held above heads — full stage visible, both performers clearly visible from head to toe, audience heads and phones along the bottom edge of frame.`;
+
+    // ─── IMAGE PROMPT TEMPLATE (STANDARD MODE) ────────────────────────────────
+    // This fixed skeleton is the canonical reference format. Standard mode must
+    // follow it sentence-by-sentence, only swapping in character/scenario specifics.
+    const standardImageTemplate = `IMAGE PROMPT TEMPLATE — STANDARD MODE (follow this exact sentence structure, only replacing the bracketed parts):
+
+"A wide-angle photo taken from the audience at an outdoor theater performance, similar to [reference to a real-world theme park or stage venue style, e.g. Universal Studios Japan]. The stage features [1 short sentence describing the set: materials, background elements, decorations]. On stage, a young [ethnicity] actor dressed as [Character A name] ([2-4 short costume details: hair, key colors, defining accessory/symbol]) stands facing a young [ethnicity] actor dressed as [Character B name] ([2-4 short costume details: hair, key colors, defining accessory/symbol]). Both actors are centered on stage, clearly separated by several meters, and are facing each other directly in combat stances — knees bent, fists ready. The audience in the foreground is slightly blurred, with people holding up phones to record. Daytime, natural lighting with stage lights. Photorealistic, high resolution, cinematic composition."
+
+RULES FOR THIS TEMPLATE:
+- Keep every sentence from the skeleton above, in the same order, with the same fixed phrasing for: the opening line, the "Both actors are centered on stage..." sentence, the "audience in the foreground..." sentence, and the closing "Daytime, natural lighting..." sentence.
+- Only the bracketed parts change: venue reference, stage description, ethnicity, character names, and costume details.
+- Costume details must be short and visual only (hair, 1-2 dominant colors, 1 defining symbol/accessory) — do not write full paragraphs per character, mirror the brevity of the example.
+- Do not add extra sentences, extra adjectives, or restructure the order. This is a fixed mold, not a loose inspiration.
+- This template applies ONLY when safe mode is OFF. When safe mode is ON, ignore this template and follow the SAFE MODE NAMING RULE instead (no names, description-only).`;
 
     // ─── SYSTEM PROMPT ────────────────────────────────────────────────────────
     const systemPrompt = `You are a prompt engineer specialized in generating viral "stage show" image-to-video sequences for AI image and video generators (ChatGPT Image, Seedance, Kling).
@@ -76,11 +89,13 @@ ${isNinja
 ${isSafeMode
     ? `- SAFE MODE IS ACTIVE. The IMAGE prompt must NEVER mention any character name, franchise name, or IP name. Describe characters only through visual elements (colors, silhouette, accessories, hair).
 - The 4 VIDEO prompts must also NEVER mention character names or franchise names. Refer to characters only as "the performer on the left" or "the performer on the right".`
-    : `- The IMAGE prompt MAY reference character names normally.
+    : `- The IMAGE prompt MAY reference character names normally, following the STANDARD MODE template below exactly.
 - The 4 VIDEO prompts must NEVER mention character names or franchise names. Refer to characters only as "the performer on the left" or "the performer on the right".`}
 
+${isSafeMode ? '' : standardImageTemplate}
+
 6. SEQUENCE STRUCTURE — exactly 1 image + 4 videos:
-- IMAGE: a freeze-frame moment right before the confrontation begins, both performers facing off, stage fully visible. Must start with the word "Photorealistic."
+- IMAGE: a freeze-frame moment right before the confrontation begins, both performers facing off, stage fully visible.${isSafeMode ? ' Must start with the word "Photorealistic."' : ' Must follow the STANDARD MODE template above exactly, starting with "A wide-angle photo taken from the audience..."'}
 - VIDEO 1 (0-5s): physical stage combat — running, strikes, blocks, spinning kicks, ending in a synchronized clash with a burst of dust/effects
 - VIDEO 2 (5-8s): first character's signature power/move triggers
 - VIDEO 3: second character's signature power/move or counter-move
@@ -91,6 +106,7 @@ Every single video prompt MUST follow this exact structure in this exact order:
 
 [A] CAMERA LINE (mandatory first line):
 "POV handheld phone from the audience, slight shake, camera tracking the action from a distance — wide shot, never zooming in, stage fully visible at all times."
+The camera itself NEVER cuts and NEVER changes angle — it only reframes subtly to keep both performers in view, exactly like an audience member filming a live show on a phone. Camera movement must always be described separately from character movement — never blend them into one motion.
 
 [B] STAGE LINE (mandatory second line):
 One sentence re-establishing the stage environment and atmosphere.
@@ -98,8 +114,17 @@ One sentence re-establishing the stage environment and atmosphere.
 [C] CHARACTER POSITIONS (mandatory):
 One sentence describing where each performer is at the start of this clip.
 
-[D] ACTION:
-Describe the motion — what moves, how fast, end state. 20-30 words max.
+[D] ACTION — CHOREOGRAPHY RULES (critical):
+Describe the motion in 20-30 words max, following these principles:
+- The power/move shown must always match the ACTUAL character cited by the user, translated into its visual essence only — shape, color, energy, physical effect — NEVER the original name of the character's move or technique. The visual style must change completely depending on who is cited:
+  - A character known for super-strength and flight would be shown launching into the air, hovering, or striking with overwhelming physical force.
+  - A character known for energy projection from the eyes/hands would be shown unleashing twin beams of light/energy from their gaze or palms.
+  - A character known for stealth and gadgets would be shown vanishing in a burst of smoke, throwing small explosive or blinding devices, or reappearing from an unexpected angle.
+  - A character known for elemental or chakra-style abilities would be shown manifesting fire, water, lightning, or condensed energy from their body.
+  - This logic applies to ANY character the user types in — always infer the move from that specific character's known abilities and visual identity, never default to a generic or unrelated power set.
+- Keep the choreography grounded and physical: strikes, dodges, rolls, blocks, recoil from impact, dust kicked up from the stage floor — describe it like a real stunt performance, not a cartoon.
+- Each video's action should escalate from the previous one (per the SEQUENCE STRUCTURE above), building toward the VIDEO 4 finishing beat.
+- Use positive, affirmative action verbs (what happens), not negative instructions (what should not happen).
 
 [E] QUALITY CLOSE:
 End with: "Photorealistic, bright daylight, cinematic live performance."

@@ -43,6 +43,66 @@ function ScenarioSelector({ value, onChange }) {
   )
 }
 
+// ─── SAFE MODE TOGGLE ────────────────────────────────────────────────────────
+function SafeModeToggle({ value, onChange }) {
+  return (
+    <div style={styles.safeModeBox}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 18 }}>{value ? '🛡️' : '⚡'}</span>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: value ? '#4ade80' : '#c084fc', marginBottom: 2 }}>
+              {value ? 'Safe Mode ON' : 'Standard Mode'}
+            </div>
+            <div style={{ fontSize: 10, color: '#64748b', lineHeight: 1.5 }}>
+              {value
+                ? 'Uses "actor dressed as" + inspired costume — less likely to be blocked'
+                : 'Uses reference photo as exact identity — more accurate but may be blocked'}
+            </div>
+          </div>
+        </div>
+
+        {/* Toggle switch */}
+        <div
+          onClick={() => onChange(!value)}
+          style={{
+            width: 44, height: 24, borderRadius: 12, cursor: 'pointer',
+            background: value ? 'rgba(74,222,128,0.3)' : 'rgba(168,85,247,0.2)',
+            border: `1px solid ${value ? 'rgba(74,222,128,0.5)' : 'rgba(168,85,247,0.3)'}`,
+            position: 'relative', flexShrink: 0, transition: 'all 0.2s',
+          }}
+        >
+          <div style={{
+            width: 18, height: 18, borderRadius: '50%',
+            background: value ? '#4ade80' : '#c084fc',
+            position: 'absolute', top: 2,
+            left: value ? 22 : 2,
+            transition: 'all 0.2s',
+            boxShadow: value ? '0 0 8px rgba(74,222,128,0.6)' : '0 0 8px rgba(168,85,247,0.6)',
+          }} />
+        </div>
+      </div>
+
+      {/* Mode details */}
+      <div style={styles.safeModeDetail}>
+        {value ? (
+          <>
+            <div style={styles.safeModeTag}>✓ "Professional stunt performer dressed as [character]"</div>
+            <div style={styles.safeModeTag}>✓ Costume inspired by — not identical to — the original</div>
+            <div style={styles.safeModeTag}>✓ Reference photo used for face + key visual cues only</div>
+          </>
+        ) : (
+          <>
+            <div style={{ ...styles.safeModeTag, borderColor: 'rgba(168,85,247,0.2)', color: '#94a3b8' }}>⚡ Reference photo used as exact identity match</div>
+            <div style={{ ...styles.safeModeTag, borderColor: 'rgba(168,85,247,0.2)', color: '#94a3b8' }}>⚡ Full costume, face and colors replicated</div>
+            <div style={{ ...styles.safeModeTag, borderColor: 'rgba(168,85,247,0.2)', color: '#94a3b8' }}>⚡ Higher fidelity — may trigger content filters</div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── PROMPT BLOCK ────────────────────────────────────────────────────────────
 function PromptBlock({ label, content, type }) {
   const [copied, setCopied] = useState(false)
@@ -125,7 +185,20 @@ function parseOutput(text) {
     }
   }
   if (current) blocks.push(current)
-  return blocks.filter(b => b.type !== 'skip' && b.content.trim().length > 10)
+
+  // Safety net: inject camera line in frontend if backend missed it
+  const cameraLine = 'POV handheld phone from the audience, slight shake, camera tracking the action from a distance — wide shot, never zooming in, stage fully visible at all times.'
+  return blocks
+    .filter(b => b.type !== 'skip' && b.content.trim().length > 10)
+    .map(b => {
+      if (b.type === 'video') {
+        const trimmed = b.content.trim()
+        if (!trimmed.startsWith('POV')) {
+          return { ...b, content: cameraLine + ' ' + trimmed }
+        }
+      }
+      return b
+    })
 }
 
 // ─── APP ─────────────────────────────────────────────────────────────────────
@@ -133,6 +206,7 @@ export default function App() {
   const [charA,    setCharA]    = useState('')
   const [charB,    setCharB]    = useState('')
   const [scenario, setScenario] = useState('universe')
+  const [safeMode, setSafeMode] = useState(false)
   const [loading,  setLoading]  = useState(false)
   const [result,   setResult]   = useState(null)
   const [error,    setError]    = useState(null)
@@ -157,6 +231,7 @@ export default function App() {
           characterB: charB,
           scenario,
           language: 'English',
+          safeMode,
         }),
       })
       const data = await res.json()
@@ -187,7 +262,7 @@ export default function App() {
             <span style={styles.heroAccent}>A viral show.</span>
           </h1>
           <p style={styles.heroDesc}>
-            Type two character names, pick a scenario, and get a full prompt sequence — ready to use with your reference photos in ChatGPT Image, Nano Banana and Seedance.
+            Type two character names, pick a scenario, and get a full prompt sequence — ready to use with your reference photos in ChatGPT Image and Seedance.
           </p>
         </div>
       </div>
@@ -212,6 +287,14 @@ export default function App() {
             <span style={{ color: '#c084fc' }}>02</span> SCENARIO
           </div>
           <ScenarioSelector value={scenario} onChange={setScenario} />
+        </section>
+
+        {/* 03 SAFE MODE */}
+        <section style={styles.section}>
+          <div style={styles.sectionLabel}>
+            <span style={{ color: '#c084fc' }}>03</span> FILTER MODE
+          </div>
+          <SafeModeToggle value={safeMode} onChange={setSafeMode} />
         </section>
 
         {/* REFERENCE TIP */}
@@ -259,6 +342,13 @@ export default function App() {
             <div style={styles.resultHeader}>
               <div style={styles.sectionLabel}>
                 <span style={{ color: '#c084fc' }}>✓</span> PROMPTS GENERATED
+                {safeMode && (
+                  <span style={{
+                    fontSize: 9, background: 'rgba(74,222,128,0.15)',
+                    border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80',
+                    borderRadius: 4, padding: '2px 6px', marginLeft: 6,
+                  }}>🛡️ SAFE MODE</span>
+                )}
               </div>
               <button
                 onClick={() => navigator.clipboard.writeText(rawText)}
@@ -382,6 +472,15 @@ const styles = {
     flex: 1, padding: '16px 14px', borderRadius: 10, border: '1px solid',
     cursor: 'pointer', textAlign: 'center', transition: 'all 0.18s',
   },
+  safeModeBox: {
+    padding: '16px', borderRadius: 10, background: '#0a0d18',
+    border: '1px solid rgba(168,85,247,0.2)', display: 'flex', flexDirection: 'column', gap: 12,
+  },
+  safeModeDetail: { display: 'flex', flexDirection: 'column', gap: 5 },
+  safeModeTag: {
+    fontSize: 10, color: '#4ade80', padding: '4px 8px', borderRadius: 5,
+    border: '1px solid rgba(74,222,128,0.2)', background: 'rgba(74,222,128,0.05)',
+  },
   refTip: {
     display: 'flex', gap: 14, alignItems: 'flex-start', padding: '14px 16px',
     borderRadius: 10, background: 'rgba(168,85,247,0.05)', border: '1px solid rgba(168,85,247,0.15)',
@@ -466,14 +565,6 @@ styleEl.textContent = `
 document.head.appendChild(styleEl)
 document.documentElement.style.background = '#000'
 document.body.style.background = '#000'
-
-const root = document.getElementById('root')
-if (root) {
-  root.style.background = '#000'
-  root.style.minHeight = '100vh'
-}
-document.body.style.background = '#000'
-document.documentElement.style.background = '#000'
 document.body.style.margin = '0'
 document.body.style.padding = '0'
 document.body.style.overflowX = 'hidden'

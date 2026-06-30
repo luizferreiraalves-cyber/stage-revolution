@@ -24,19 +24,21 @@ export default async function handler(req, res) {
     const isSafeMode = safeMode === true;
 
     // ─── CHARACTER IDENTITY RULES ─────────────────────────────────────────────
-    function characterIdentityRule(label, name, uploadOrder) {
-      const refText = uploadOrder === 1
-        ? 'the first uploaded reference image'
-        : 'the second uploaded reference image';
-
+    function characterIdentityRule(label, name, position) {
       if (isSafeMode) {
-        // SAFE MODE: "actor dressed as" + reference photo as costume guide only
-        return `- ${label}: a professional stunt performer dressed as ${name}. Use ${refText} as a costume and styling reference only — match the key visual elements (colors, silhouette, accessories) but the costume does not need to be an exact replica. The performer should be clearly recognizable as an interpretation of ${name} through iconic visual cues. Do NOT describe the performer's face — use the reference photo for that. Photorealistic human performer, not CGI.`;
+        // SAFE MODE: NO name cited — describe only iconic visual elements
+        // Claude must infer appearance from the name but never write the name in the prompt
+        return `- ${label}: a professional stunt performer whose costume is inspired by the character known as "${name}". DO NOT write the character's name anywhere in the image prompt. Instead, describe only the iconic visual elements of their costume: silhouette, dominant colors, key accessories, hair style, and any recognizable symbols or patterns — enough to make the character identifiable without naming them. No reference photo needed. Photorealistic human performer, not CGI.`;
       } else {
-        // STANDARD MODE: direct reference image identity
-        return `- ${label} (${name}): a professional stunt performer dressed as ${name}. Use ${refText} as the complete and sole identity reference for this character — face, hair, costume, colors, and all visual details must match the reference photo exactly. Photorealistic human performer, not CGI.`;
+        // STANDARD MODE: cite name + reference photo as identity
+        return `- ${label} (${name}): a professional stunt performer dressed as ${name}. The user may attach a reference photo for this character — if provided, use it as the complete identity reference for face, hair, costume, colors, and all visual details. If no photo is attached, infer the character's iconic visual appearance from your knowledge of "${name}". Photorealistic human performer, not CGI.`;
       }
     }
+
+    // ─── IMAGE CAMERA RULE ────────────────────────────────────────────────────
+    const imageCameraRule = isSafeMode
+      ? `- CAMERA FOR IMAGE: ultra wide-angle shot from deep in the audience, phone held high above heads — performers appear small on a large stage, full stage environment dominates the frame, no facial details visible, audience silhouettes and raised phones fill the lower third of the frame. The distance makes individual costume details subtle.`
+      : `- CAMERA FOR IMAGE: wide-angle shot from the audience, phone held above heads — full stage visible, both performers clearly visible from head to toe, audience heads and phones along the bottom edge of frame.`;
 
     // ─── SYSTEM PROMPT ────────────────────────────────────────────────────────
     const systemPrompt = `You are a prompt engineer specialized in generating viral "stage show" image-to-video sequences for AI image and video generators (ChatGPT Image, Seedance, Kling).
@@ -50,15 +52,16 @@ RULES YOU MUST FOLLOW EXACTLY:
 - The stage must remain FULLY visible at all times — never zoom in, never cut close
 - Camera always remains at audience distance — wide shot throughout
 - Bright daylight, photorealistic, ultra sharp, high resolution, 4K
+${imageCameraRule}
 
 2. SCENARIO:
 ${isNinja
-  ? `- Classic ninja village stage: tiled Japanese roof, grey stone wall, clan banners, large white cloth with black kanji, wooden pole, forested green mountains in the background`
-  : `- Use the names "${characterA}" and "${characterB}" as context clues. Infer each character's visual universe and iconic aesthetic elements from your knowledge. Then build a cohesive live-stage-show set design that fuses or blends both universes — architecture style, dominant colors, props, banners, atmospheric lighting — into a single stage environment that feels native to both. Keep the audience-POV outdoor format.`}
+    ? `- Classic ninja village stage: tiled Japanese roof, grey stone wall, clan banners, large white cloth with black kanji, wooden pole, forested green mountains in the background`
+    : `- Use the names "${characterA}" and "${characterB}" as context clues. Infer each character's visual universe and iconic aesthetic elements from your knowledge. Then build a cohesive live-stage-show set design that fuses or blends both universes — architecture style, dominant colors, props, banners, atmospheric lighting — into a single stage environment that feels native to both. Keep the audience-POV outdoor format.`}
 
 3. CHARACTERS:
-${characterIdentityRule('Character A (left)', characterA, 1)}
-${characterIdentityRule('Character B (right)', characterB, 2)}
+${characterIdentityRule('Character A (left)', characterA, 'left')}
+${characterIdentityRule('Character B (right)', characterB, 'right')}
 - Maximum 2 characters per scene.
 - Performers are in realistic cosplay/costume — no real weapons, all moves are stage choreography/martial arts/acrobatics with practical effects.
 - Each character must inherit the lighting, shadows and color grading of the stage environment.
@@ -66,12 +69,15 @@ ${characterIdentityRule('Character B (right)', characterB, 2)}
 
 4. POWERS / ACTIONS:
 ${isNinja
-  ? `- Use classic ninja jutsu-style effects: clone jutsu, fire breath, water shield, dust burst, smoke summoning. Pick the ones that best fit the characters.`
-  : `- Infer each character's powers and signature moves from their name and known universe. Use canonical abilities (energy blasts, elemental powers, signature techniques, etc.). If a character is obscure or fictional, create thematically fitting powers based on their name and implied world.`}
+    ? `- Use classic ninja jutsu-style effects: clone jutsu, fire breath, water shield, dust burst, smoke summoning. Pick the ones that best fit the characters.`
+    : `- Infer each character's powers and signature moves from their name and known universe. Use canonical abilities (energy blasts, elemental powers, signature techniques, etc.). If a character is obscure or fictional, create thematically fitting powers based on their name and implied world.`}
 
-5. VIDEO PROMPT NAMING RULE (critical):
-- The IMAGE prompt MAY reference character names normally.
-- The 4 VIDEO prompts must NEVER mention character names or franchise names. Refer to characters only by stage position: "the performer on the left" or "the performer on the right".
+5. SAFE MODE NAMING RULE (critical — only applies when safe mode is active):
+${isSafeMode
+    ? `- SAFE MODE IS ACTIVE. The IMAGE prompt must NEVER mention any character name, franchise name, or IP name. Describe characters only through visual elements (colors, silhouette, accessories, hair).
+- The 4 VIDEO prompts must also NEVER mention character names or franchise names. Refer to characters only as "the performer on the left" or "the performer on the right".`
+    : `- The IMAGE prompt MAY reference character names normally.
+- The 4 VIDEO prompts must NEVER mention character names or franchise names. Refer to characters only as "the performer on the left" or "the performer on the right".`}
 
 6. SEQUENCE STRUCTURE — exactly 1 image + 4 videos:
 - IMAGE: a freeze-frame moment right before the confrontation begins, both performers facing off, stage fully visible. Must start with the word "Photorealistic."

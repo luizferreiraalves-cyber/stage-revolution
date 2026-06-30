@@ -56,8 +56,8 @@ function SafeModeToggle({ value, onChange }) {
             </div>
             <div style={{ fontSize: 10, color: '#64748b', lineHeight: 1.5 }}>
               {value
-                ? 'Uses "actor dressed as" + inspired costume — less likely to be blocked'
-                : 'Uses reference photo as exact identity — more accurate but may be blocked'}
+                ? 'No character names in prompt — visual description only, extra wide camera'
+                : 'Cites character name + optional reference photo — more accurate, higher block risk'}
             </div>
           </div>
         </div>
@@ -87,15 +87,17 @@ function SafeModeToggle({ value, onChange }) {
       <div style={styles.safeModeDetail}>
         {value ? (
           <>
-            <div style={styles.safeModeTag}>✓ "Professional stunt performer dressed as [character]"</div>
-            <div style={styles.safeModeTag}>✓ Costume inspired by — not identical to — the original</div>
-            <div style={styles.safeModeTag}>✓ Reference photo used for face + key visual cues only</div>
+            <div style={styles.safeModeTagGreen}>✓ Character name never mentioned in the prompt</div>
+            <div style={styles.safeModeTagGreen}>✓ Described only by iconic visual elements (colors, silhouette, accessories)</div>
+            <div style={styles.safeModeTagGreen}>✓ No reference photo needed — appearance inferred automatically</div>
+            <div style={styles.safeModeTagGreen}>✓ Extra wide camera — performers appear small, no facial details visible</div>
           </>
         ) : (
           <>
-            <div style={{ ...styles.safeModeTag, borderColor: 'rgba(168,85,247,0.2)', color: '#94a3b8' }}>⚡ Reference photo used as exact identity match</div>
-            <div style={{ ...styles.safeModeTag, borderColor: 'rgba(168,85,247,0.2)', color: '#94a3b8' }}>⚡ Full costume, face and colors replicated</div>
-            <div style={{ ...styles.safeModeTag, borderColor: 'rgba(168,85,247,0.2)', color: '#94a3b8' }}>⚡ Higher fidelity — may trigger content filters</div>
+            <div style={styles.safeModeTagPurple}>⚡ Character name cited directly in the prompt</div>
+            <div style={styles.safeModeTagPurple}>⚡ Reference photo optional — attach for better likeness</div>
+            <div style={styles.safeModeTagPurple}>⚡ Standard audience distance camera</div>
+            <div style={styles.safeModeTagPurple}>⚡ Higher fidelity — may trigger content filters</div>
           </>
         )}
       </div>
@@ -289,7 +291,7 @@ export default function App() {
           <ScenarioSelector value={scenario} onChange={setScenario} />
         </section>
 
-        {/* 03 SAFE MODE */}
+        {/* 03 FILTER MODE */}
         <section style={styles.section}>
           <div style={styles.sectionLabel}>
             <span style={{ color: '#c084fc' }}>03</span> FILTER MODE
@@ -297,18 +299,35 @@ export default function App() {
           <SafeModeToggle value={safeMode} onChange={setSafeMode} />
         </section>
 
-        {/* REFERENCE TIP */}
-        <div style={styles.refTip}>
-          <div style={{ fontSize: 22 }}>📎</div>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: '#c084fc', marginBottom: 3 }}>
-              How reference photos work
-            </div>
-            <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.6 }}>
-              After generating, paste the image prompt directly into <strong style={{ color: '#c084fc' }}>ChatGPT Image</strong> and attach your two reference photos there — one per character, in order (A first, B second). The prompt already instructs the AI to use each photo as an identity reference.
+        {/* REFERENCE TIP — only shown in standard mode */}
+        {!safeMode && (
+          <div style={styles.refTip}>
+            <div style={{ fontSize: 22 }}>📎</div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#c084fc', marginBottom: 3 }}>
+                How reference photos work
+              </div>
+              <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.6 }}>
+                After generating, paste the image prompt directly into <strong style={{ color: '#c084fc' }}>ChatGPT Image</strong> and attach your two reference photos there — one per character, in order (A first, B second). The prompt already instructs the AI to use each photo as an identity reference.
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* SAFE MODE TIP */}
+        {safeMode && (
+          <div style={{ ...styles.refTip, borderColor: 'rgba(74,222,128,0.2)', background: 'rgba(74,222,128,0.04)' }}>
+            <div style={{ fontSize: 22 }}>🛡️</div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#4ade80', marginBottom: 3 }}>
+                Safe Mode active — no photos needed
+              </div>
+              <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.6 }}>
+                The prompt describes each character by visual elements only — no names, no reference photos required. Just paste the image prompt into <strong style={{ color: '#4ade80' }}>ChatGPT Image</strong> and generate directly.
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* GENERATE BUTTON */}
         <button
@@ -376,7 +395,9 @@ export default function App() {
                 {[
                   {
                     n: '1', t: 'Copy the image prompt',
-                    d: 'Paste into ChatGPT Image and attach both reference photos in the same chat message — Character A first, then B',
+                    d: safeMode
+                      ? 'Paste into ChatGPT Image — no reference photos needed in Safe Mode'
+                      : 'Paste into ChatGPT Image and attach both reference photos — Character A first, then B',
                   },
                   {
                     n: '2', t: 'Generate the initial image',
@@ -477,9 +498,13 @@ const styles = {
     border: '1px solid rgba(168,85,247,0.2)', display: 'flex', flexDirection: 'column', gap: 12,
   },
   safeModeDetail: { display: 'flex', flexDirection: 'column', gap: 5 },
-  safeModeTag: {
+  safeModeTagGreen: {
     fontSize: 10, color: '#4ade80', padding: '4px 8px', borderRadius: 5,
     border: '1px solid rgba(74,222,128,0.2)', background: 'rgba(74,222,128,0.05)',
+  },
+  safeModeTagPurple: {
+    fontSize: 10, color: '#94a3b8', padding: '4px 8px', borderRadius: 5,
+    border: '1px solid rgba(168,85,247,0.2)', background: 'rgba(168,85,247,0.04)',
   },
   refTip: {
     display: 'flex', gap: 14, alignItems: 'flex-start', padding: '14px 16px',
